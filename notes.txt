@@ -1,0 +1,5 @@
+comparision of the model and the original data
+for every N do average - homogeneous variance over x
+distortion to a perfect curve
+y=ax**0.5 + random_noise
+choose dataset
