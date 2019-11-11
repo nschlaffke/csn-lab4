@@ -6,14 +6,14 @@ data_path <- "./data"
 file_names <- list.files(data_path)
 
 row_is_valid <- function(row) {
-    n <- row["vertices"]
-    k2 <- row["degree_2nd_moment"]
-    d <- row["mean_length"]
-    l1 <- 4-6/n
-    r1 <- n-1
-    l2 <- n/(8*(n-1)) * k2 + 1/2
-    r2 <- r1
-    return((l1 <= k2 && k2 <= r1) && (l2 <= d && d <= r2) && (((n - 1)**2 + (n/4 - 1) * n * k2) != 0))
+  n <- row["vertices"]
+  k2 <- row["degree_2nd_moment"]
+  d <- row["mean_length"]
+  l1 <- 4-6/n
+  r1 <- n-1
+  l2 <- n/(8*(n-1)) * k2 + 1/2
+  r2 <- r1
+  return((l1 <= k2 && k2 <= r1) && (l2 <= d && d <= r2) && (((n - 1)**2 + (n/4 - 1) * n * k2) != 0))
 }
 
 get_statistics <- function(language, data) {
