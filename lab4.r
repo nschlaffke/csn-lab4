@@ -1,7 +1,7 @@
 rm(list = ls()) # Clear the environment
 
 require(xtable)
-
+setwd("~/Documents/erasmus_2019/CSN/csn-lab4")
 data_path <- "./data"
 file_names <- list.files(data_path)
 
@@ -187,16 +187,25 @@ est_language <- function(language) {
   nonlinear_model <- nls(aggr_mean_length_normalized~a*vertices^b,data=languages_aggr[[language]], start = get_init_val(language, "2"), trace = TRUE)
   res$"2"$a <- coef(nonlinear_model)["a"]
   res$"2"$b <- coef(nonlinear_model)["b"]
+  res$"2"$RSS <- deviance(nonlinear_model)
+  res$"2"$AIC <- AIC(nonlinear_model)
+  res$"2"$s <- sqrt(deviance(nonlinear_model)/df.residual(nonlinear_model))
   
   nonlinear_model <- nls(aggr_mean_length_normalized~a*vertices^b+d,data=languages_aggr[[language]], start = get_init_val(language, "2+"), trace = TRUE)
   res$"2+"$a <- coef(nonlinear_model)["a"]
   res$"2+"$b <- coef(nonlinear_model)["b"]
   res$"2+"$d <- coef(nonlinear_model)["d"]
+  res$"2+"$RSS <- deviance(nonlinear_model)
+  res$"2+"$AIC <- AIC(nonlinear_model)
+  res$"2+"$s <- sqrt(deviance(nonlinear_model)/df.residual(nonlinear_model))
   
   tryCatch({
     nonlinear_model = nls(aggr_mean_length_normalized~a*exp(vertices*c),data=languages_aggr[[language]], start = get_init_val(language, "3"), trace = TRUE)
     res$"3"$a <- coef(nonlinear_model)["a"]
     res$"3"$c <- coef(nonlinear_model)["c"]
+    res$"3"$RSS <- deviance(nonlinear_model)
+    res$"3"$AIC <- AIC(nonlinear_model)
+    res$"3"$s <- sqrt(deviance(nonlinear_model)/df.residual(nonlinear_model))
   },
   error=function(cond) {
     message("ERROR FITTING MODEL 3")
@@ -207,6 +216,9 @@ est_language <- function(language) {
   
   nonlinear_model = nls(aggr_mean_length_normalized~a*log(vertices),data=languages_aggr[[language]], start = get_init_val(language, "4"), trace = TRUE)
   res$"4"$a <- coef(nonlinear_model)["a"]
+  res$"4"$RSS <- deviance(nonlinear_model)
+  res$"4"$AIC <- AIC(nonlinear_model)
+  res$"4"$s <- sqrt(deviance(nonlinear_model)/df.residual(nonlinear_model))
   
   return(res)
 }
