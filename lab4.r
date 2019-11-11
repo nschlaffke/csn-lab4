@@ -74,8 +74,6 @@ for (i in seq_along(file_names)) {
   language_statistics <- rbind(language_statistics, new_row)
 }
 
-print(language_statistics)
-
 print_basic <- function(language) {
   plot(languages[[language]]$vertices, languages[[language]]$mean_length, xlab = "vertices", ylab = "mean dependency length")
   plot(log(languages[[language]]$vertices), log(languages[[language]]$mean_length), xlab = "log(vertices)", ylab = "log(mean dependency length)")
@@ -183,30 +181,63 @@ get_init_val <- function(language, method) {
 
 est_language <- function(language) {
   res <- list("0"=list(), "2"=list(), "2+"=list(), "3"=list(), "4"=list())
+  n <- length(languages_aggr[[language]]$vertices)
+  
+  res$"0"$RSS <- sum((languages_aggr[[language]]$aggr_mean_length_normalized-(n+1)/3)^2)
+  res$"0"$AIC <- n*log(2*pi) + n*log(res$"0"$RSS/n) + n + 2*(0 + 1)
+  res$"0"$s <- sqrt(res$"0"$RSS/(n - 0))
   
   nonlinear_model <- nls(aggr_mean_length_normalized~a*vertices^b,data=languages_aggr[[language]], start = get_init_val(language, "2"), trace = TRUE)
   res$"2"$a <- coef(nonlinear_model)["a"]
   res$"2"$b <- coef(nonlinear_model)["b"]
+  res$"2"$RSS <- deviance(nonlinear_model)
+  res$"2"$AIC <- AIC(nonlinear_model)
+  res$"2"$s <- sqrt(deviance(nonlinear_model)/df.residual(nonlinear_model))
   
   nonlinear_model <- nls(aggr_mean_length_normalized~a*vertices^b+d,data=languages_aggr[[language]], start = get_init_val(language, "2+"), trace = TRUE)
   res$"2+"$a <- coef(nonlinear_model)["a"]
   res$"2+"$b <- coef(nonlinear_model)["b"]
   res$"2+"$d <- coef(nonlinear_model)["d"]
+  res$"2+"$RSS <- deviance(nonlinear_model)
+  res$"2+"$AIC <- AIC(nonlinear_model)
+  res$"2+"$s <- sqrt(deviance(nonlinear_model)/df.residual(nonlinear_model))
   
-  tryCatch({
+  res = tryCatch({
     nonlinear_model = nls(aggr_mean_length_normalized~a*exp(vertices*c),data=languages_aggr[[language]], start = get_init_val(language, "3"), trace = TRUE)
     res$"3"$a <- coef(nonlinear_model)["a"]
     res$"3"$c <- coef(nonlinear_model)["c"]
-  },
-  error=function(cond) {
+    res$"3"$RSS <- deviance(nonlinear_model)
+    res$"3"$AIC <- AIC(nonlinear_model)
+    res$"3"$s <- sqrt(deviance(nonlinear_model)/df.residual(nonlinear_model))
+    res
+  }, error=function(cond) {
+    res$"3"$a <- NaN
+    res$"3"$c <- NaN
+    res$"3"$RSS <- NaN
+    res$"3"$AIC <- NaN
+    res$"3"$s <- NaN
     message("ERROR FITTING MODEL 3")
     message("Here's the original error message:")
     message(cond)
-  }
-  )
+    return(res)
+  })
   
   nonlinear_model = nls(aggr_mean_length_normalized~a*log(vertices),data=languages_aggr[[language]], start = get_init_val(language, "4"), trace = TRUE)
   res$"4"$a <- coef(nonlinear_model)["a"]
+  res$"4"$RSS <- deviance(nonlinear_model)
+  res$"4"$AIC <- AIC(nonlinear_model)
+  res$"4"$s <- sqrt(deviance(nonlinear_model)/df.residual(nonlinear_model))
+  
+  print("min")
+  min_aic = min(res$"0"$AIC, res$"2"$AIC, res$"2+"$AIC, res$"3"$AIC, res$"4"$AIC, na.rm=TRUE)
+  print(min_aic)
+  res$"0"$AIC_d = res$"0"$AIC - min_aic
+  res$"2"$AIC_d = res$"2"$AIC - min_aic
+  res$"2+"$AIC_d = res$"2+"$AIC - min_aic
+  res$"3"$AIC_d = res$"3"$AIC - min_aic
+  res$"4"$AIC_d = res$"4"$AIC - min_aic
+  
+  print(c(res$"0"$AIC_d, res$"2"$AIC_d, res$"2+"$AIC_d, res$"3"$AIC_d, res$"4"$AIC_d))
   
   return(res)
 }
@@ -215,6 +246,19 @@ results <- list()
 for (l in names(languages)) {
   print(l)
   results[[l]] <- est_language(l)
+}
+
+s = data.frame(matrix(ncol=6, nrow=0))
+aics = data.frame(matrix(ncol=6, nrow=0))
+aics_d  = data.frame(matrix(ncol=6, nrow=0))
+names(aics) = c("language", "0_s", "2_s", "2+_s", "3_s", "4_s")
+names(aics) = c("language", "0_aic", "2_aic", "2+_aic", "3_aic", "4_aic")
+names(aics) = c("language", "0_aic_d", "2_aic_d", "2+_aic_d", "3_aic_d", "4_aic_d")
+for (language in names(results)) {
+  r <- results[[language]]
+  s[nrow(s) + 1,] = c(language, r$`0`$s, r$`2`$s, r$`2+`$s, r$`3`$s, r$`4`$s)
+  aics[nrow(aics) + 1,] = c(language, r$`0`$AIC, r$`2`$AIC, r$`2+`$AIC, r$`3`$AIC, r$`4`$AIC)
+  aics_d[nrow(aics_d) + 1,] = c(language, r$`0`$AIC_d, r$`2`$AIC_d, r$`2+`$AIC_d, r$`3`$AIC_d, r$`4`$AIC_d)
 }
 
 print_est <- function(language) {
@@ -233,21 +277,11 @@ print_est_loglog <- function(language) {
   lines(log(languages_aggr[[language]]$vertices), -log(-results[[language]]$`4`$a*log(languages_aggr[[language]]$vertices)), col = "brown")
 }
 
-print(results)
-
 stopifnot(TRUE)
-
-print_est("Catalan")
-print_est("Turkish")
-print_est_loglog("Catalan")
 
 print_d_basic_estimation('Catalan')
 print_d_basic_estimation('English')
 print_aggregated('Catalan')
 
-plot(languages$Catalan$vertices, languages$Catalan$mean_length, xlab = "vertices", ylab = "mean dependency length")
-plot(languages$Catalan$vertices, languages$Catalan$mean_length_normalized, xlab = "vertices", ylab = "mean dependency length")
 plot(languages_aggr$Catalan$vertices, languages_aggr$Catalan$mean_length, xlab = "vertices", ylab = "mean dependency length")
 plot(languages_aggr$Catalan$vertices, E_rla_d(languages_aggr$Catalan$vertices), xlab = "vertices", ylab = "mean dependency length")
-
-plot(languages_aggr$English$vertices, languages_aggr$English$mean_length, xlab = "vertices", ylab = "mean dependency length")

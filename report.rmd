@@ -9,7 +9,7 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_chunk$set(fig.width=7, fig.height=5)
+knitr::opts_chunk$set(fig.width=7, fig.height=5, fig.align = "center")
 
 library(knitr)
 
@@ -46,9 +46,9 @@ abv
 
 ```{r echo=FALSE, cache=TRUE, warning=FALSE}
 kable(language_statistics,
-            caption="\\label{tab:table1}Basic properties of the languages' degree sequences",
-      #col.names = c("language", "N", "E", "$\\langle k \\rangle$", "$\\delta$"),
-      align=c('l', 'r', 'r', 'r', 'r'))
+  caption="\\label{tab:table1}Basic properties of the languages' degree sequences",
+  col.names = c("Language", "N", "$\\mu_{n}$", "$\\sigma_{n}$", "$\\mu_{\\langle d_z \\rangle}$", "$\\sigma_{\\langle d_z \\rangle}$"),
+      align=c('l', 'r', 'r', 'r', 'r', 'r'))
 ```
 
 ```{r echo=FALSE, cache=TRUE}
@@ -56,13 +56,45 @@ plot(languages$Catalan$vertices, languages$Catalan$mean_length_normalized, xlab 
 plot(languages_aggr$Catalan$vertices, languages_aggr$Catalan$mean_length_normalized, xlab = "vertices", ylab = "mean dependency length")
 ```
 
-```{r echo=FALSE, cache=TRUE}
+```{r echo=FALSE, cache=TRUE, warning=FALSE}
+# Parameters
+```
+
+```{r echo=FALSE, cache=TRUE, warning=FALSE}
+kable(s,
+  caption="\\label{tab:table1}s measure",
+  col.names = c("Language", "0", "2", "2+", "3", "4"),
+  align=c('l', 'r', 'r', 'r', 'r', 'r'),
+  digits=c(0, 3, 3, 3, 3, 3))
+```
+
+```{r echo=FALSE, cache=TRUE, warning=FALSE}
+kable(aics,
+  caption="\\label{tab:table1}AIC measure",
+  col.names = c("Language", "0", "2", "2+", "3", "4"),
+  align=c('l', 'r', 'r', 'r', 'r', 'r'),
+  digits=c(0, 3, 3, 3, 3, 3))
+```
+
+```{r echo=FALSE, cache=TRUE, warning=FALSE}
+kable(aics_d,
+  caption="\\label{tab:table1}$\\Delta$AIC measure",
+  col.names = c("Language", "0", "2", "2+", "3", "4"),
+  align=c('l', 'r', 'r', 'r', 'r', 'r'),
+  digits=c(0, 3, 3, 3, 3, 3))
+```
+
+```{r echo=FALSE, cache=TRUE, warning=FALSE}
 print_est("Catalan")
+```
+
+```{r echo=FALSE, cache=TRUE, warning=FALSE}
+print_est_loglog("Catalan")
 ```
 
 # Discussion
 
-jh
+It was highly likly before that that all models will peform better than the null hypothesis. And after plotting you could see it because the null-hypothesis for the normales mean-degree $\left\langle d\right\rangle_z$ is just zero and every model is closer to the data then the x-axis.
 
 # Methods
 
