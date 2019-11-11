@@ -1,0 +1,77 @@
+---
+title: "CSN Lab 4"
+author: "Norbert Schlaffke & Lukas Ramroth"
+date: "November 2019"
+output:
+  pdf_document:
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(fig.width=7, fig.height=5)
+
+library(knitr)
+
+source('lab4.r')
+```
+
+# Introduction
+
+hi
+
+## Used metric
+
+Special normalized metric by ramon...
+
+$$
+\left\langle d\right\rangle_z = \frac{\left\langle d\right\rangle - \mathbb{E}_{rla}[\left\langle d\right\rangle]}{\sigma_{rla}[\left\langle d\right\rangle]}
+$$
+blabla
+$$
+\mathbb{E}_{rla}[\left\langle d\right\rangle] = \frac{n + 1}{3}
+$$
+blabla
+$$
+\sigma_{rla}[\left\langle d\right\rangle] = \sqrt{\frac{\mathbb{V}_{r l a}[D]}{n - 1}}
+$$
+aaa
+$$
+\mathbb{V}_{r l a}[D]=\frac{n+1}{45}\left[(n-1)^{2}+\left(\frac{n}{4}-1\right) n\left\langle k^{2}\right\rangle\right]
+$$
+
+# Results
+
+abv
+
+```{r echo=FALSE, cache=TRUE, warning=FALSE}
+kable(language_statistics,
+            caption="\\label{tab:table1}Basic properties of the languages' degree sequences",
+      #col.names = c("language", "N", "E", "$\\langle k \\rangle$", "$\\delta$"),
+      align=c('l', 'r', 'r', 'r', 'r'))
+```
+
+```{r echo=FALSE, cache=TRUE}
+plot(languages$Catalan$vertices, languages$Catalan$mean_length_normalized, xlab = "vertices", ylab = "mean dependency length")
+plot(languages_aggr$Catalan$vertices, languages_aggr$Catalan$mean_length_normalized, xlab = "vertices", ylab = "mean dependency length")
+```
+
+```{r echo=FALSE, cache=TRUE}
+print_est("Catalan")
+```
+
+# Discussion
+
+jh
+
+# Methods
+
+no loglog space since negative values, so guessing starting parameters by hand.
+Also Func1 makes no sense, since it cant by negative...
+
+used metrics
+
+* $f(n)=a n^{b}$ (model 2), a power-law model
+* $f(n)=a n^{b}+d$ (model 2+), a power-law model with residual
+* $f(n)=a e^{c n}$ (model 3), an exponantial model
+* $f(n)=a \log n$ (model 4), a logarithmic model
